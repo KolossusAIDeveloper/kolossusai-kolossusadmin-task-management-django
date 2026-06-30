@@ -1,13 +1,22 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" id="htmlRoot" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}TaskFlow{% endblock %}</title>
+    <!-- Apply saved theme immediately to prevent flash -->
+    <script>
+        (function() {
+            var t = localStorage.getItem('tf-theme') || 'dark';
+            document.getElementById('htmlRoot').setAttribute('data-bs-theme', t);
+        })();
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
-        :root {
+        /* ====== DARK THEME (default) ====== */
+        :root,
+        [data-bs-theme="dark"] {
             --bs-body-bg: #0f1117;
             --bs-body-color: #e2e8f0;
             --card-bg: #1a1d27;
@@ -15,6 +24,73 @@
             --border-color: #2d3148;
             --accent: #6366f1;
             --accent-hover: #4f46e5;
+            --heading-color: #f1f5f9;
+            --text-muted-custom: #64748b;
+            --text-secondary: #94a3b8;
+            --nav-link-color: #94a3b8;
+            --nav-link-hover-color: #c7d2fe;
+            --nav-link-active-color: #a5b4fc;
+            --nav-label-color: #475569;
+            --badge-count-bg: #1e2236;
+            --badge-count-color: #64748b;
+            --task-title-color: #e2e8f0;
+            --task-meta-color: #64748b;
+            --task-link-color: #e2e8f0;
+            --task-link-hover: #a5b4fc;
+            --table-color: #cbd5e1;
+            --form-bg: #1e2236;
+            --form-color: #e2e8f0;
+            --placeholder-color: #475569;
+            --comment-bg: rgba(255,255,255,0.03);
+            --kanban-col-bg: rgba(255,255,255,0.03);
+            --row-hover-bg: rgba(255,255,255,0.03);
+            --scrollbar-thumb: #2d3148;
+            --scrollbar-thumb-hover: #3d4468;
+            --stat-value-color: #f1f5f9;
+            --theme-btn-color: #94a3b8;
+            --outline-btn-color: #a5b4fc;
+            --outline-btn-border: rgba(99,102,241,0.4);
+            --outline-btn-hover-bg: rgba(99,102,241,0.15);
+            --outline-btn-hover-color: #c7d2fe;
+        }
+
+        /* ====== LIGHT THEME ====== */
+        [data-bs-theme="light"] {
+            --bs-body-bg: #f8fafc;
+            --bs-body-color: #1e293b;
+            --card-bg: #ffffff;
+            --sidebar-bg: #f1f5f9;
+            --border-color: #e2e8f0;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --heading-color: #1e293b;
+            --text-muted-custom: #64748b;
+            --text-secondary: #64748b;
+            --nav-link-color: #64748b;
+            --nav-link-hover-color: #6366f1;
+            --nav-link-active-color: #6366f1;
+            --nav-label-color: #94a3b8;
+            --badge-count-bg: #e2e8f0;
+            --badge-count-color: #64748b;
+            --task-title-color: #1e293b;
+            --task-meta-color: #94a3b8;
+            --task-link-color: #334155;
+            --task-link-hover: #6366f1;
+            --table-color: #334155;
+            --form-bg: #ffffff;
+            --form-color: #1e293b;
+            --placeholder-color: #94a3b8;
+            --comment-bg: #f8fafc;
+            --kanban-col-bg: rgba(0,0,0,0.02);
+            --row-hover-bg: rgba(0,0,0,0.02);
+            --scrollbar-thumb: #cbd5e1;
+            --scrollbar-thumb-hover: #94a3b8;
+            --stat-value-color: #1e293b;
+            --theme-btn-color: #64748b;
+            --outline-btn-color: #6366f1;
+            --outline-btn-border: rgba(99,102,241,0.5);
+            --outline-btn-hover-bg: rgba(99,102,241,0.08);
+            --outline-btn-hover-color: #4f46e5;
         }
 
         body {
@@ -22,6 +98,7 @@
             color: var(--bs-body-color);
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             min-height: 100vh;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         /* Sidebar */
@@ -36,6 +113,7 @@
             z-index: 100;
             display: flex;
             flex-direction: column;
+            transition: background 0.25s ease, border-color 0.25s ease;
         }
 
         .sidebar-brand {
@@ -59,11 +137,11 @@
         .sidebar-brand h5 {
             font-weight: 700;
             letter-spacing: -0.3px;
-            color: #f1f5f9;
+            color: var(--heading-color);
         }
 
         .sidebar-brand small {
-            color: #64748b;
+            color: var(--text-muted-custom);
             font-size: 0.7rem;
         }
 
@@ -77,13 +155,13 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: #475569;
+            color: var(--nav-label-color);
             padding: 0 0.75rem;
             margin: 0.75rem 0 0.375rem;
         }
 
         .sidebar-nav .nav-link {
-            color: #94a3b8;
+            color: var(--nav-link-color);
             border-radius: 8px;
             padding: 0.6rem 0.75rem;
             font-size: 0.875rem;
@@ -97,12 +175,12 @@
 
         .sidebar-nav .nav-link:hover {
             background: rgba(99, 102, 241, 0.1);
-            color: #c7d2fe;
+            color: var(--nav-link-hover-color);
         }
 
         .sidebar-nav .nav-link.active {
             background: rgba(99, 102, 241, 0.15);
-            color: #a5b4fc;
+            color: var(--nav-link-active-color);
             border-left: 3px solid var(--accent);
         }
 
@@ -113,8 +191,8 @@
 
         .badge-count {
             margin-left: auto;
-            background: #1e2236;
-            color: #64748b;
+            background: var(--badge-count-bg);
+            color: var(--badge-count-color);
             font-size: 0.7rem;
             padding: 2px 7px;
             border-radius: 20px;
@@ -139,12 +217,13 @@
             position: sticky;
             top: 0;
             z-index: 99;
+            transition: background 0.25s ease, border-color 0.25s ease;
         }
 
         .top-navbar .page-title {
             font-size: 1.05rem;
             font-weight: 600;
-            color: #f1f5f9;
+            color: var(--heading-color);
             margin: 0;
         }
 
@@ -153,11 +232,34 @@
             flex: 1;
         }
 
+        /* Theme toggle button */
+        .btn-theme-toggle {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--theme-btn-color);
+            border: 1px solid var(--border-color);
+            background: transparent;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .btn-theme-toggle:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(99,102,241,0.1);
+        }
+
         /* Cards */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
+            transition: background 0.25s ease, border-color 0.25s ease;
         }
 
         .card-header {
@@ -180,7 +282,7 @@
 
         .task-card:hover {
             border-color: var(--accent);
-            box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 4px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 4px 20px rgba(0,0,0,0.15);
             transform: translateY(-1px);
         }
 
@@ -192,25 +294,33 @@
         .task-card-title {
             font-size: 0.875rem;
             font-weight: 600;
-            color: #e2e8f0;
+            color: var(--task-title-color);
             margin-bottom: 0.375rem;
             line-height: 1.4;
         }
 
         .task-card-meta {
             font-size: 0.75rem;
-            color: #64748b;
+            color: var(--task-meta-color);
         }
 
         /* Priority badges */
-        .badge-priority-low { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
-        .badge-priority-medium { background: rgba(234,179,8,0.15); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
-        .badge-priority-high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        .badge-priority-low { background: rgba(34,197,94,0.15); color: #16a34a; border: 1px solid rgba(34,197,94,0.3); }
+        .badge-priority-medium { background: rgba(234,179,8,0.15); color: #ca8a04; border: 1px solid rgba(234,179,8,0.3); }
+        .badge-priority-high { background: rgba(239,68,68,0.15); color: #dc2626; border: 1px solid rgba(239,68,68,0.3); }
+
+        [data-bs-theme="dark"] .badge-priority-low { color: #4ade80; }
+        [data-bs-theme="dark"] .badge-priority-medium { color: #facc15; }
+        [data-bs-theme="dark"] .badge-priority-high { color: #f87171; }
 
         /* Status badges */
-        .badge-status-todo { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
-        .badge-status-in_progress { background: rgba(99,102,241,0.2); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
-        .badge-status-done { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        .badge-status-todo { background: rgba(100,116,139,0.2); color: #64748b; border: 1px solid rgba(100,116,139,0.3); }
+        .badge-status-in_progress { background: rgba(99,102,241,0.2); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); }
+        .badge-status-done { background: rgba(34,197,94,0.15); color: #16a34a; border: 1px solid rgba(34,197,94,0.3); }
+
+        [data-bs-theme="dark"] .badge-status-todo { color: #94a3b8; }
+        [data-bs-theme="dark"] .badge-status-in_progress { color: #a5b4fc; }
+        [data-bs-theme="dark"] .badge-status-done { color: #4ade80; }
 
         .badge {
             font-size: 0.7rem;
@@ -225,15 +335,17 @@
         .overdue-indicator {
             background: rgba(239,68,68,0.1);
             border: 1px solid rgba(239,68,68,0.3);
-            color: #f87171;
+            color: #dc2626;
             font-size: 0.7rem;
             padding: 2px 7px;
             border-radius: 5px;
         }
 
+        [data-bs-theme="dark"] .overdue-indicator { color: #f87171; }
+
         /* Kanban board */
         .kanban-column {
-            background: rgba(255,255,255,0.03);
+            background: var(--kanban-col-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             min-height: 600px;
@@ -257,6 +369,7 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             margin: 0;
+            color: var(--heading-color);
         }
 
         .col-todo .kanban-column-header { border-top: 3px solid #64748b; }
@@ -302,13 +415,13 @@
         .stat-value {
             font-size: 1.75rem;
             font-weight: 700;
-            color: #f1f5f9;
+            color: var(--stat-value-color);
             line-height: 1;
         }
 
         .stat-label {
             font-size: 0.75rem;
-            color: #64748b;
+            color: var(--text-muted-custom);
             margin-top: 2px;
         }
 
@@ -323,37 +436,38 @@
         }
 
         .btn-outline-primary {
-            color: #a5b4fc;
-            border-color: rgba(99,102,241,0.4);
+            color: var(--outline-btn-color);
+            border-color: var(--outline-btn-border);
         }
         .btn-outline-primary:hover {
-            background: rgba(99,102,241,0.15);
+            background: var(--outline-btn-hover-bg);
             border-color: var(--accent);
-            color: #c7d2fe;
+            color: var(--outline-btn-hover-color);
         }
 
         /* Form controls */
         .form-control, .form-select {
-            background: #1e2236;
+            background: var(--form-bg);
             border-color: var(--border-color);
-            color: #e2e8f0;
+            color: var(--form-color);
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
         }
 
         .form-control:focus, .form-select:focus {
-            background: #1e2236;
+            background: var(--form-bg);
             border-color: var(--accent);
-            color: #e2e8f0;
+            color: var(--form-color);
             box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
         }
 
         .form-control::placeholder {
-            color: #475569;
+            color: var(--placeholder-color);
         }
 
         .form-label {
             font-size: 0.8rem;
             font-weight: 600;
-            color: #94a3b8;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 0.375rem;
@@ -368,19 +482,22 @@
 
         .alert-success {
             background: rgba(34,197,94,0.1);
-            color: #4ade80;
+            color: #16a34a;
             border: 1px solid rgba(34,197,94,0.2);
         }
 
         .alert-danger {
             background: rgba(239,68,68,0.1);
-            color: #f87171;
+            color: #dc2626;
             border: 1px solid rgba(239,68,68,0.2);
         }
 
+        [data-bs-theme="dark"] .alert-success { color: #4ade80; }
+        [data-bs-theme="dark"] .alert-danger { color: #f87171; }
+
         /* Comments */
         .comment-item {
-            background: rgba(255,255,255,0.03);
+            background: var(--comment-bg);
             border: 1px solid var(--border-color);
             border-radius: 10px;
             padding: 1rem;
@@ -403,16 +520,17 @@
 
         /* Table */
         .table {
-            color: #cbd5e1;
+            color: var(--table-color);
         }
 
         .table > :not(caption) > * > * {
             background: transparent;
             border-color: var(--border-color);
+            color: var(--table-color);
         }
 
         .table-hover > tbody > tr:hover > * {
-            background: rgba(255,255,255,0.03);
+            background: var(--row-hover-bg);
         }
 
         /* Search/filter area */
@@ -427,15 +545,17 @@
         /* Due date badge */
         .due-date-badge {
             font-size: 0.72rem;
-            color: #64748b;
+            color: var(--text-muted-custom);
             display: flex;
             align-items: center;
             gap: 0.25rem;
         }
 
         .due-date-badge.overdue {
-            color: #f87171;
+            color: #dc2626;
         }
+
+        [data-bs-theme="dark"] .due-date-badge.overdue { color: #f87171; }
 
         /* Task list row */
         .task-list-row {
@@ -452,18 +572,18 @@
         }
 
         .task-list-row:hover {
-            background: rgba(255,255,255,0.03);
+            background: var(--row-hover-bg);
         }
 
         .task-list-row a {
-            color: #e2e8f0;
+            color: var(--task-link-color);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.875rem;
         }
 
         .task-list-row a:hover {
-            color: #a5b4fc;
+            color: var(--task-link-hover);
         }
 
         /* Mobile */
@@ -483,8 +603,8 @@
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #2d3148; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3d4468; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -546,6 +666,10 @@
                 <h6 class="page-title">{% block page_title %}TaskFlow{% endblock %}</h6>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <!-- Theme Toggle -->
+                <button id="themeToggle" class="btn-theme-toggle" onclick="toggleTheme()" title="Switch theme">
+                    <i id="themeIcon" class="bi bi-sun-fill"></i>
+                </button>
                 <a href="{% url 'task_create' %}" class="btn btn-primary btn-sm d-flex align-items-center gap-2">
                     <i class="bi bi-plus-lg"></i>
                     <span>New Task</span>
@@ -558,7 +682,7 @@
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-2"></i>{{ message }}
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
         </div>
@@ -575,8 +699,31 @@
             document.getElementById('sidebar').classList.toggle('open');
         }
 
+        function updateThemeIcon(theme) {
+            var icon = document.getElementById('themeIcon');
+            if (icon) {
+                // Show sun when in dark mode (click to go light), moon when in light mode (click to go dark)
+                icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+            }
+        }
+
+        function toggleTheme() {
+            var html = document.getElementById('htmlRoot');
+            var current = html.getAttribute('data-bs-theme');
+            var next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-bs-theme', next);
+            localStorage.setItem('tf-theme', next);
+            updateThemeIcon(next);
+        }
+
+        // Set initial icon on page load
+        (function() {
+            var theme = document.getElementById('htmlRoot').getAttribute('data-bs-theme') || 'dark';
+            updateThemeIcon(theme);
+        })();
+
         // Update task count in sidebar
-        fetch('/api/counts/').catch(() => {});
+        fetch('/api/counts/').catch(function() {});
     </script>
     {% block extra_js %}{% endblock %}
 </body>
