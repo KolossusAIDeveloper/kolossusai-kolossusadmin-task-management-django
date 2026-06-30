@@ -1,13 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Task, Comment
 from .forms import TaskForm, CommentForm, TaskFilterForm
 
 
+@login_required
 def task_list(request):
-    tasks = Task.objects.all()
+    tasks = Task.objects.select_related('assigned_to', 'created_by').all()
     form = TaskFilterForm(request.GET)
 
     if form.is_valid():
@@ -17,6 +19,8 @@ def task_list(request):
             tasks = tasks.filter(priority=form.cleaned_data['priority'])
         if form.cleaned_data.get('search'):
             tasks = tasks.filter(title__icontains=form.cleaned_data['search'])
+        if form.cleaned_data.get('assignee'):
+            tasks = tasks.filter(assigned_to=form.cleaned_data['assignee'])
 
     counts = {
         'total': Task.objects.count(),
@@ -32,30 +36,29 @@ def task_list(request):
     })
 
 
+@login_required
 def task_board(request):
-    todo_tasks = Task.objects.filter(status='todo')
-    in_progress_tasks = Task.objects.filter(status='in_progress')
-    done_tasks = Task.objects.filter(status='done')
-
     return render(request, 'tasks/task_board.html', {
-        'todo_tasks': todo_tasks,
-        'in_progress_tasks': in_progress_tasks,
-        'done_tasks': done_tasks,
+        'todo_tasks': Task.objects.filter(status='todo').select_related('assigned_to'),
+        'in_progress_tasks': Task.objects.filter(status='in_progress').select_related('assigned_to'),
+        'done_tasks': Task.objects.filter(status='done').select_related('assigned_to'),
     })
 
 
+@login_required
 def task_detail(request, pk):
     task = get_object_or_404(Task, pk=pk)
     comment_form = CommentForm()
-    comments = task.comments.all()
+    comments = task.comments.select_related('author').all()
 
     if request.method == 'POST':
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
             comment = comment_form.save(commit=False)
             comment.task = task
+            comment.author = request.user
             comment.save()
-            messages.success(request, 'Comment added successfully.')
+            messages.success(request, 'Comment added.')
             return redirect('task_detail', pk=pk)
 
     return render(request, 'tasks/task_detail.html', {
@@ -65,12 +68,15 @@ def task_detail(request, pk):
     })
 
 
+@login_required
 def task_create(request):
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
-            task = form.save()
-            messages.success(request, f'Task "{task.title}" created successfully!')
+            task = form.save(commit=False)
+            task.created_by = request.user
+            task.save()
+            messages.success(request, f'Task "{task.title}" created!')
             return redirect('task_detail', pk=task.pk)
     else:
         form = TaskForm()
@@ -82,6 +88,7 @@ def task_create(request):
     })
 
 
+@login_required
 def task_edit(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
@@ -89,7 +96,7 @@ def task_edit(request, pk):
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Task "{task.title}" updated successfully!')
+            messages.success(request, f'Task "{task.title}" updated!')
             return redirect('task_detail', pk=task.pk)
     else:
         form = TaskForm(instance=task)
@@ -102,32 +109,32 @@ def task_edit(request, pk):
     })
 
 
+@login_required
 def task_delete(request, pk):
     task = get_object_or_404(Task, pk=pk)
 
     if request.method == 'POST':
         title = task.title
         task.delete()
-        messages.success(request, f'Task "{title}" deleted successfully!')
+        messages.success(request, f'Task "{title}" deleted.')
         return redirect('task_list')
 
     return render(request, 'tasks/task_confirm_delete.html', {'task': task})
 
 
+@login_required
 @require_POST
 def task_update_status(request, pk):
     task = get_object_or_404(Task, pk=pk)
     new_status = request.POST.get('status')
-    valid_statuses = ['todo', 'in_progress', 'done']
-
-    if new_status in valid_statuses:
+    if new_status in ['todo', 'in_progress', 'done']:
         task.status = new_status
         task.save()
         return JsonResponse({'success': True, 'status': new_status})
-
     return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
 
 
+@login_required
 @require_POST
 def comment_delete(request, pk):
     comment = get_object_or_404(Comment, pk=pk)

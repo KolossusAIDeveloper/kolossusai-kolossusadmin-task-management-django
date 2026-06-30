@@ -11,8 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput && \
+RUN python manage.py makemigrations --noinput && \
     python manage.py migrate && \
+    python manage.py collectstatic --noinput && \
     python manage.py seed_data
 
 EXPOSE 8000

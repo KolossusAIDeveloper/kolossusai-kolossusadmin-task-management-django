@@ -30,12 +30,19 @@
             <span></span>
         {% endif %}
 
-        {% with comment_count=task.comments.count %}
-        {% if comment_count %}
-            <span class="task-card-meta">
-                <i class="bi bi-chat me-1"></i>{{ comment_count }}
-            </span>
-        {% endif %}
-        {% endwith %}
+        <div class="d-flex align-items-center gap-2">
+            {% if task.assigned_to %}
+            {% with profile=task.assigned_to.profile %}
+            <div title="Assigned to {{ profile.display_name }}" style="width:20px;height:20px;border-radius:50%;background:{{ profile.avatar_color }};display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:white;">{{ profile.initials }}</div>
+            {% endwith %}
+            {% endif %}
+            {% with comment_count=task.comments.count %}
+            {% if comment_count %}
+                <span class="task-card-meta">
+                    <i class="bi bi-chat me-1"></i>{{ comment_count }}
+                </span>
+            {% endif %}
+            {% endwith %}
+        </div>
     </div>
 </div>

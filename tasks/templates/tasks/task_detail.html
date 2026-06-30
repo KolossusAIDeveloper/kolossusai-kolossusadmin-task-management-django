@@ -111,12 +111,22 @@
                         {% for comment in comments %}
                         <div class="comment-item">
                             <div class="d-flex align-items-start gap-3">
+                                {% if comment.author %}
+                                {% with profile=comment.author.profile %}
+                                <div class="comment-avatar" style="background:{{ profile.avatar_color }}">
+                                    {{ profile.initials }}
+                                </div>
+                                {% endwith %}
+                                {% else %}
                                 <div class="comment-avatar">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
+                                {% endif %}
                                 <div class="flex-grow-1">
                                     <div class="d-flex align-items-center justify-content-between mb-1">
-                                        <span style="font-size:0.8rem; font-weight:600; color:#94a3b8;">User</span>
+                                        <span style="font-size:0.8rem; font-weight:600; color:#94a3b8;">
+                                            {% if comment.author %}{{ comment.author.profile.display_name }}{% else %}Anonymous{% endif %}
+                                        </span>
                                         <div class="d-flex align-items-center gap-2">
                                             <span style="font-size:0.72rem; color:#475569;">
                                                 {{ comment.created_at|date:"M d, Y · H:i" }}
@@ -187,7 +197,37 @@
                         <span style="font-size:0.82rem;color:#64748b;">{{ task.created_at|date:"M d, Y · H:i" }}</span>
                     </div>
                 </div>
-                <div class="task-list-row" style="cursor:default; border:0;">
+                <div class="task-list-row" style="cursor:default;">
+                    <div style="font-size:0.75rem;color:#64748b;min-width:80px;">Assignee</div>
+                    <div>
+                        {% if task.assigned_to %}
+                            {% with profile=task.assigned_to.profile %}
+                            <a href="{% url 'user_detail' task.assigned_to.pk %}" class="d-flex align-items-center gap-2" style="text-decoration:none;">
+                                <div style="width:22px;height:22px;border-radius:50%;background:{{ profile.avatar_color }};display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:white;flex-shrink:0;">{{ profile.initials }}</div>
+                                <span style="font-size:.82rem;color:#94a3b8;">{{ profile.display_name }}</span>
+                            </a>
+                            {% endwith %}
+                        {% else %}
+                            <span style="font-size:0.82rem;color:#475569;">Unassigned</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="task-list-row" style="cursor:default;">
+                    <div style="font-size:0.75rem;color:#64748b;min-width:80px;">Created by</div>
+                    <div>
+                        {% if task.created_by %}
+                            {% with profile=task.created_by.profile %}
+                            <a href="{% url 'user_detail' task.created_by.pk %}" class="d-flex align-items-center gap-2" style="text-decoration:none;">
+                                <div style="width:22px;height:22px;border-radius:50%;background:{{ profile.avatar_color }};display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:white;flex-shrink:0;">{{ profile.initials }}</div>
+                                <span style="font-size:.82rem;color:#94a3b8;">{{ profile.display_name }}</span>
+                            </a>
+                            {% endwith %}
+                        {% else %}
+                            <span style="font-size:0.82rem;color:#475569;">—</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="task-list-row" style="cursor:default;">
                     <div style="font-size:0.75rem;color:#64748b;min-width:80px;">Updated</div>
                     <div>
                         <span style="font-size:0.82rem;color:#64748b;">{{ task.updated_at|date:"M d, Y · H:i" }}</span>

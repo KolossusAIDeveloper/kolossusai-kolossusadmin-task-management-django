@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile — TaskFlow{% endblock %}
+{% block page_title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <span class="fw-semibold" style="font-size:.9rem;"><i class="bi bi-person-gear me-2 text-muted"></i>Edit Profile</span>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">First Name</label>
+                            {{ user_form.first_name }}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Last Name</label>
+                            {{ user_form.last_name }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        {{ user_form.email }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bio</label>
+                        {{ profile_form.bio }}
+                    </div>
+                    {% if profile_form.role %}
+                    <div class="mb-4">
+                        <label class="form-label">Role</label>
+                        {{ profile_form.role }}
+                        <div style="font-size:.75rem;color:#64748b;margin-top:.25rem;">Only admins can see this field.</div>
+                    </div>
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save Changes
+                        </button>
+                        <a href="{% url 'profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

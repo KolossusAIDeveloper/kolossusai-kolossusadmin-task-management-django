@@ -54,15 +54,20 @@
                         </div>
                     </div>
 
-                    <!-- Due Date -->
-                    <div class="mb-4">
-                        <label class="form-label" for="{{ form.due_date.id_for_label }}">Due Date</label>
-                        {{ form.due_date }}
-                        {% if form.due_date.errors %}
-                            <div class="text-danger mt-1" style="font-size:0.8rem;">{{ form.due_date.errors }}</div>
-                        {% endif %}
-                        <div class="text-muted mt-1" style="font-size:0.75rem;">
-                            <i class="bi bi-info-circle me-1"></i>Leave blank if no specific deadline.
+                    <!-- Due Date & Assignee -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.due_date.id_for_label }}">Due Date</label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}
+                                <div class="text-danger mt-1" style="font-size:0.8rem;">{{ form.due_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.assigned_to.id_for_label }}">
+                                <i class="bi bi-person me-1"></i>Assign To
+                            </label>
+                            {{ form.assigned_to }}
                         </div>
                     </div>
 

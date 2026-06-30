@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}{{ target_user.username }} — TaskFlow{% endblock %}
+{% block page_title %}{{ profile.display_name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Profile Card -->
+    <div class="col-12 col-lg-4">
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="user-avatar-lg mx-auto mb-3" style="background:{{ profile.avatar_color }}">
+                    {{ profile.initials }}
+                </div>
+                <h5 class="fw-bold mb-0">{{ profile.display_name }}</h5>
+                <div style="color:#64748b;font-size:.875rem;">@{{ target_user.username }}</div>
+                {% if profile.is_admin %}
+                    <span class="badge mt-2" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);">
+                        <i class="bi bi-shield-fill me-1"></i>{{ profile.get_role_display }}
+                    </span>
+                {% else %}
+                    <span class="badge mt-2" style="background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);">
+                        <i class="bi bi-person me-1"></i>{{ profile.get_role_display }}
+                    </span>
+                {% endif %}
+                {% if not target_user.is_active %}
+                    <span class="badge ms-1 mt-2" style="background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.3);">Inactive</span>
+                {% endif %}
+                {% if profile.bio %}
+                    <p class="mt-3 mb-0" style="font-size:.875rem;color:#94a3b8;">{{ profile.bio }}</p>
+                {% endif %}
+                <div class="mt-3 pt-3" style="border-top:1px solid var(--border-color);text-align:left;">
+                    {% if target_user.email %}
+                        <div style="font-size:.8rem;color:#64748b;margin-bottom:.25rem;"><i class="bi bi-envelope me-2"></i>{{ target_user.email }}</div>
+                    {% endif %}
+                    <div style="font-size:.8rem;color:#64748b;"><i class="bi bi-calendar3 me-2"></i>Joined {{ target_user.date_joined|date:"M d, Y" }}</div>
+                </div>
+            </div>
+            <div class="card-footer" style="border-top:1px solid var(--border-color);padding:.875rem 1.25rem;">
+                <div class="d-flex gap-2">
+                    {% if is_own %}
+                        <a href="{% url 'profile_edit' %}" class="btn btn-primary btn-sm flex-fill"><i class="bi bi-pencil me-1"></i>Edit Profile</a>
+                    {% elif is_admin %}
+                        <a href="{% url 'user_edit' target_user.pk %}" class="btn btn-primary btn-sm flex-fill"><i class="bi bi-pencil me-1"></i>Edit User</a>
+                    {% endif %}
+                    {% if is_admin and not is_own %}
+                        <a href="{% url 'user_delete' target_user.pk %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Stats -->
+        <div class="card mt-3">
+            <div class="card-header"><span class="fw-semibold" style="font-size:.875rem;">Task Stats</span></div>
+            <div class="card-body p-0">
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid var(--border-color);">
+                    <span style="font-size:.875rem;">Total Assigned</span>
+                    <span class="badge" style="background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);">{{ stats.total }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid var(--border-color);">
+                    <span style="font-size:.875rem;">In Progress</span>
+                    <span class="badge badge-status-in_progress">{{ stats.in_progress }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid var(--border-color);">
+                    <span style="font-size:.875rem;">To Do</span>
+                    <span class="badge badge-status-todo">{{ stats.todo }}</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-between px-4 py-3">
+                    <span style="font-size:.875rem;">Completed</span>
+                    <span class="badge badge-status-done">{{ stats.done }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assigned Tasks -->
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-list-check text-muted"></i>
+                    <span class="fw-semibold" style="font-size:.9rem;">Assigned Tasks</span>
+                    <span class="badge bg-secondary">{{ stats.total }}</span>
+                </div>
+                {% if is_admin %}
+                <a href="{% url 'task_create' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus me-1"></i>New Task</a>
+                {% endif %}
+            </div>
+            {% if assigned_tasks %}
+                {% for task in assigned_tasks %}
+                <div class="task-list-row">
+                    <div class="flex-shrink-0">
+                        {% if task.status == 'done' %}<i class="bi bi-check-circle-fill" style="color:#22c55e;font-size:1.1rem;"></i>
+                        {% elif task.status == 'in_progress' %}<i class="bi bi-record-circle-fill" style="color:#6366f1;font-size:1.1rem;"></i>
+                        {% else %}<i class="bi bi-circle" style="color:#64748b;font-size:1.1rem;"></i>{% endif %}
+                    </div>
+                    <div class="flex-grow-1 min-width-0">
+                        <a href="{% url 'task_detail' task.pk %}" class="{% if task.status == 'done' %}text-decoration-line-through opacity-60{% endif %}">{{ task.title }}</a>
+                        {% if task.description %}<div style="font-size:.75rem;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:300px;">{{ task.description|truncatechars:60 }}</div>{% endif %}
+                    </div>
+                    <span class="badge badge-priority-{{ task.priority }} d-none d-md-inline">{{ task.get_priority_display }}</span>
+                    <span class="badge badge-status-{{ task.status }} d-none d-md-inline">{{ task.get_status_display }}</span>
+                    {% if task.due_date %}
+                    <span class="due-date-badge {% if task.is_overdue %}overdue{% endif %} d-none d-lg-flex">
+                        <i class="bi bi-calendar3"></i>{{ task.due_date|date:"M d, Y" }}
+                    </span>
+                    {% endif %}
+                    <div class="flex-shrink-0 d-flex gap-1">
+                        <a href="{% url 'task_detail' task.pk %}" class="btn btn-sm" style="color:#64748b;padding:4px 8px;"><i class="bi bi-eye"></i></a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5">
+                    <div style="font-size:2.5rem;opacity:.3;margin-bottom:.75rem;">📋</div>
+                    <p class="text-muted" style="font-size:.875rem;">No tasks assigned to {{ profile.display_name }} yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.user-avatar-lg{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:white;}
+</style>
+{% endblock %}

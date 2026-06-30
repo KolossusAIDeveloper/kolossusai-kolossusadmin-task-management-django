@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Team Members — TaskFlow{% endblock %}
+{% block page_title %}Team Members{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(99,102,241,.15)"><i class="bi bi-people" style="color:#a5b4fc"></i></div>
+            <div><div class="stat-value">{{ users.count }}</div><div class="stat-label">Total Members</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(239,68,68,.12)"><i class="bi bi-shield-fill" style="color:#f87171"></i></div>
+            <div><div class="stat-value">{{ users|length }}</div><div class="stat-label">Admins</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(34,197,94,.12)"><i class="bi bi-person-check" style="color:#4ade80"></i></div>
+            <div><div class="stat-value" id="active-count">—</div><div class="stat-label">Active</div></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(234,179,8,.12)"><i class="bi bi-person-plus" style="color:#facc15"></i></div>
+            <div><a href="{% url 'register' %}" style="text-decoration:none;"><div class="stat-value">+</div><div class="stat-label">Add Member</div></a></div>
+        </div>
+    </div>
+</div>
+
+<!-- User Table -->
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-people text-muted"></i>
+            <span class="fw-semibold" style="font-size:.9rem;">All Members</span>
+            <span class="badge bg-secondary">{{ users.count }}</span>
+        </div>
+        <a href="{% url 'register' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-person-plus me-1"></i>Add Member
+        </a>
+    </div>
+
+    {% for user in users %}
+    {% with profile=user.profile %}
+    <div class="task-list-row align-items-center">
+        <!-- Avatar -->
+        <div class="flex-shrink-0">
+            <div class="user-avatar-sm" style="background:{{ profile.avatar_color }}">{{ profile.initials }}</div>
+        </div>
+        <!-- Name + username -->
+        <div class="flex-grow-1 min-width-0">
+            <a href="{% url 'user_detail' user.pk %}" style="font-weight:600;font-size:.875rem;">
+                {{ profile.display_name }}
+            </a>
+            <div style="font-size:.75rem;color:#64748b;">@{{ user.username }}</div>
+        </div>
+        <!-- Email -->
+        <div class="d-none d-md-block" style="font-size:.8rem;color:#64748b;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {% if user.email %}<i class="bi bi-envelope me-1"></i>{{ user.email }}{% endif %}
+        </div>
+        <!-- Role Badge -->
+        <div class="flex-shrink-0">
+            {% if profile.is_admin %}
+                <span class="badge" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);">
+                    <i class="bi bi-shield-fill me-1"></i>Admin
+                </span>
+            {% else %}
+                <span class="badge" style="background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);">
+                    <i class="bi bi-person me-1"></i>Member
+                </span>
+            {% endif %}
+        </div>
+        <!-- Active tasks -->
+        <div class="flex-shrink-0 d-none d-lg-block text-center" style="min-width:70px;">
+            <span style="font-size:.8rem;color:#64748b;">
+                <i class="bi bi-list-task me-1"></i>{{ user.task_count }}
+            </span>
+        </div>
+        <!-- Status -->
+        <div class="flex-shrink-0 d-none d-lg-block">
+            {% if user.is_active %}
+                <span class="badge" style="background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.25);">Active</span>
+            {% else %}
+                <span class="badge" style="background:rgba(100,116,139,.15);color:#94a3b8;border:1px solid rgba(100,116,139,.3);">Inactive</span>
+            {% endif %}
+        </div>
+        <!-- Actions -->
+        <div class="flex-shrink-0 d-flex gap-1">
+            <a href="{% url 'user_detail' user.pk %}" class="btn btn-sm" style="color:#64748b;padding:4px 8px;" title="View"><i class="bi bi-eye"></i></a>
+            {% if request.user == user or request.user.is_superuser or request.user.profile.is_admin %}
+            <a href="{% url 'user_edit' user.pk %}" class="btn btn-sm" style="color:#64748b;padding:4px 8px;" title="Edit"><i class="bi bi-pencil"></i></a>
+            {% endif %}
+            {% if request.user.is_superuser or request.user.profile.is_admin %}
+            {% if request.user != user %}
+            <a href="{% url 'user_delete' user.pk %}" class="btn btn-sm" style="color:#64748b;padding:4px 8px;" title="Delete"><i class="bi bi-trash"></i></a>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endwith %}
+    {% empty %}
+    <div class="text-center py-5">
+        <div style="font-size:2.5rem;opacity:.3;margin-bottom:.75rem;">👥</div>
+        <p class="text-muted">No members found.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.user-avatar-sm{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:white;flex-shrink:0;}
+</style>
+
+<script>
+document.getElementById('active-count').textContent = document.querySelectorAll('.badge[style*="4ade80"]').length;
+</script>
+{% endblock %}

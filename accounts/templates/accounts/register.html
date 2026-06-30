@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — TaskFlow</title>
+    <script>(function(){var t=localStorage.getItem('tf-theme')||'dark';document.getElementById('htmlRoot').setAttribute('data-bs-theme',t);})();</script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root,[data-bs-theme="dark"]{--bg:#0f1117;--card-bg:#1a1d27;--border:#2d3148;--accent:#6366f1;--text:#e2e8f0;--muted:#64748b;--form-bg:#1e2236;--placeholder:#475569;}
+        [data-bs-theme="light"]{--bg:#f8fafc;--card-bg:#ffffff;--border:#e2e8f0;--accent:#6366f1;--text:#1e293b;--muted:#64748b;--form-bg:#ffffff;--placeholder:#94a3b8;}
+        body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Inter',-apple-system,sans-serif;padding:2rem 1rem;}
+        .auth-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:460px;}
+        .brand-logo{width:48px;height:48px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:white;margin:0 auto 1.5rem;}
+        .form-control,.form-select{background:var(--form-bg);border-color:var(--border);color:var(--text);}
+        .form-control:focus,.form-select:focus{background:var(--form-bg);border-color:var(--accent);color:var(--text);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .form-control::placeholder{color:var(--placeholder);}
+        .btn-primary{background:var(--accent);border-color:var(--accent);}
+        .btn-primary:hover{background:#4f46e5;border-color:#4f46e5;}
+        .form-label{font-size:.8rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;}
+        a{color:var(--accent);}a:hover{color:#a5b4fc;}
+        .errorlist{color:#f87171;font-size:.8rem;list-style:none;padding:0;margin:.25rem 0 0;}
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <div class="brand-logo">TF</div>
+    <h4 class="text-center fw-bold mb-1">Create account</h4>
+    <p class="text-center mb-4" style="color:var(--muted);font-size:.875rem;">Join your team on TaskFlow</p>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3 mb-3">
+            <div class="col-6">
+                <label class="form-label">First Name</label>
+                {{ form.first_name }}
+            </div>
+            <div class="col-6">
+                <label class="form-label">Last Name</label>
+                {{ form.last_name }}
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Username <span style="color:#f87171">*</span></label>
+            {{ form.username }}
+            {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            {{ form.email }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password <span style="color:#f87171">*</span></label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            {% if form.password1.help_text %}<div style="font-size:.75rem;color:var(--muted);margin-top:.25rem;">{{ form.password1.help_text }}</div>{% endif %}
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Confirm Password <span style="color:#f87171">*</span></label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+            <i class="bi bi-person-plus me-2"></i>Create Account
+        </button>
+    </form>
+
+    <div class="text-center mt-4" style="font-size:.875rem;color:var(--muted);">
+        Already have an account? <a href="{% url 'login' %}">Sign in</a>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

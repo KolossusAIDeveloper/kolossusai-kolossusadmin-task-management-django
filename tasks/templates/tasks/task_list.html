@@ -55,11 +55,11 @@
 <!-- Filter Bar -->
 <div class="filter-bar">
     <form method="get" class="row g-2 align-items-end">
-        <div class="col-12 col-md-5">
+        <div class="col-12 col-md-4">
             {{ filter_form.search.label_tag }}
             {{ filter_form.search }}
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-2">
             <label class="form-label">Status</label>
             {{ filter_form.status }}
         </div>
@@ -67,7 +67,11 @@
             <label class="form-label">Priority</label>
             {{ filter_form.priority }}
         </div>
-        <div class="col-12 col-md-2 d-flex gap-2">
+        <div class="col-6 col-md-2">
+            <label class="form-label">Assignee</label>
+            {{ filter_form.assignee }}
+        </div>
+        <div class="col-6 col-md-2 d-flex gap-2">
             <button type="submit" class="btn btn-primary btn-sm flex-fill">
                 <i class="bi bi-search me-1"></i> Filter
             </button>
@@ -145,6 +149,17 @@
                 {% endif %}
             </div>
 
+            <!-- Assignee -->
+            <div class="flex-shrink-0 d-none d-lg-flex align-items-center gap-1">
+                {% if task.assigned_to %}
+                    {% with profile=task.assigned_to.profile %}
+                    <div title="{{ profile.display_name }}" style="width:22px;height:22px;border-radius:50%;background:{{ profile.avatar_color }};display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:white;">{{ profile.initials }}</div>
+                    <span style="font-size:.75rem;color:#64748b;">{{ task.assigned_to.username }}</span>
+                    {% endwith %}
+                {% else %}
+                    <span style="font-size:.75rem;color:#475569;">—</span>
+                {% endif %}
+            </div>
             <!-- Comments count -->
             <div class="flex-shrink-0 d-none d-lg-block">
                 <span style="font-size:0.75rem; color:#64748b;">

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ target_user.username }} — TaskFlow{% endblock %}
+{% block page_title %}Delete User{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-5">
+        <div class="card" style="border-color:rgba(239,68,68,.3);">
+            <div class="card-header" style="border-bottom:1px solid rgba(239,68,68,.2);background:rgba(239,68,68,.05);">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle" style="color:#f87171;"></i>
+                    <span class="fw-semibold" style="font-size:.9rem;color:#f87171;">Confirm Delete</span>
+                </div>
+            </div>
+            <div class="card-body p-4 text-center">
+                <div class="user-avatar-lg mx-auto mb-3" style="background:{{ target_user.profile.avatar_color }}">
+                    {{ target_user.profile.initials }}
+                </div>
+                <h5 class="fw-bold">{{ target_user.profile.display_name }}</h5>
+                <div style="color:#64748b;font-size:.875rem;margin-bottom:1.5rem;">@{{ target_user.username }}</div>
+                <div class="alert" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;color:#f87171;">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    This will permanently delete this user account. Tasks assigned to them will become unassigned. This action cannot be undone.
+                </div>
+                <form method="post" class="d-flex gap-2 justify-content-center mt-3">
+                    {% csrf_token %}
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-secondary flex-fill">Cancel</a>
+                    <button type="submit" class="btn btn-danger flex-fill">
+                        <i class="bi bi-trash me-1"></i>Delete User
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.user-avatar-lg{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:white;}
+</style>
+{% endblock %}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — TaskFlow</title>
+    <script>(function(){var t=localStorage.getItem('tf-theme')||'dark';document.getElementById('htmlRoot').setAttribute('data-bs-theme',t);})();</script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root,[data-bs-theme="dark"]{--bg:#0f1117;--card-bg:#1a1d27;--border:#2d3148;--accent:#6366f1;--text:#e2e8f0;--muted:#64748b;--form-bg:#1e2236;--placeholder:#475569;}
+        [data-bs-theme="light"]{--bg:#f8fafc;--card-bg:#ffffff;--border:#e2e8f0;--accent:#6366f1;--text:#1e293b;--muted:#64748b;--form-bg:#ffffff;--placeholder:#94a3b8;}
+        body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Inter',-apple-system,sans-serif;}
+        .auth-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:420px;}
+        .brand-logo{width:48px;height:48px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:white;margin:0 auto 1.5rem;}
+        .form-control,.form-select{background:var(--form-bg);border-color:var(--border);color:var(--text);}
+        .form-control:focus,.form-select:focus{background:var(--form-bg);border-color:var(--accent);color:var(--text);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+        .form-control::placeholder{color:var(--placeholder);}
+        .btn-primary{background:var(--accent);border-color:var(--accent);}
+        .btn-primary:hover{background:#4f46e5;border-color:#4f46e5;}
+        .form-label{font-size:.8rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;}
+        .alert-danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:10px;}
+        a{color:var(--accent);}
+        a:hover{color:#a5b4fc;}
+        .demo-info{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:10px;padding:.875rem 1rem;font-size:.8rem;color:#a5b4fc;}
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <div class="brand-logo">TF</div>
+    <h4 class="text-center fw-bold mb-1">Welcome back</h4>
+    <p class="text-center mb-4" style="color:var(--muted);font-size:.875rem;">Sign in to your TaskFlow account</p>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger py-2">
+            <i class="bi bi-exclamation-circle me-2"></i>{{ form.non_field_errors.0 }}
+        </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="text-danger mt-1" style="font-size:.8rem;">{{ form.username.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Password</label>
+            {{ form.password }}
+            {% if form.password.errors %}<div class="text-danger mt-1" style="font-size:.8rem;">{{ form.password.errors.0 }}</div>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+        </button>
+    </form>
+
+    <div class="text-center mt-4" style="font-size:.875rem;color:var(--muted);">
+        Don't have an account? <a href="{% url 'register' %}">Create one</a>
+    </div>
+
+    <div class="demo-info mt-4">
+        <strong>Demo credentials:</strong><br>
+        Admin: <code>admin</code> / <code>admin123</code><br>
+        Member: <code>alice</code> / <code>password123</code>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
