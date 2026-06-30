@@ -125,7 +125,6 @@ class TestTaskViews(TestCase):
         response = self.client.post(
             reverse('task_update_status', args=[self.task.pk]),
             {'status': 'done'},
-            content_type='application/x-www-form-urlencoded'
         )
         self.assertEqual(response.status_code, 200)
         self.task.refresh_from_db()
