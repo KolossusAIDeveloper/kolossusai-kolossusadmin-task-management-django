@@ -9,6 +9,11 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() != 'false'
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://task.kolossusai.cloud',
+    'https://*.kolossusai.cloud',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
