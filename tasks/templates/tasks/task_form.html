@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — TaskFlow{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{% if task %}{% url 'task_detail' task.pk %}{% else %}{% url 'task_list' %}{% endif %}"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h5 class="mb-0 fw-bold">{{ title }}</h5>
+                <p class="mb-0 text-muted" style="font-size:0.8rem;">
+                    {% if task %}Editing "{{ task.title }}"{% else %}Fill in the details below to create a new task.{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Title -->
+                    <div class="mb-4">
+                        <label class="form-label" for="{{ form.title.id_for_label }}">Task Title *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger mt-1" style="font-size:0.8rem;">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1" style="font-size:0.8rem;">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Status & Priority -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.status.id_for_label }}">Status</label>
+                            {{ form.status }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ form.priority.id_for_label }}">Priority</label>
+                            {{ form.priority }}
+                        </div>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div class="mb-4">
+                        <label class="form-label" for="{{ form.due_date.id_for_label }}">Due Date</label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                            <div class="text-danger mt-1" style="font-size:0.8rem;">{{ form.due_date.errors }}</div>
+                        {% endif %}
+                        <div class="text-muted mt-1" style="font-size:0.75rem;">
+                            <i class="bi bi-info-circle me-1"></i>Leave blank if no specific deadline.
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex align-items-center gap-3 pt-2" style="border-top:1px solid #2d3148;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-{% if task %}check-lg{% else %}plus-lg{% endif %} me-2"></i>
+                            {{ submit_text }}
+                        </button>
+                        <a href="{% if task %}{% url 'task_detail' task.pk %}{% else %}{% url 'task_list' %}{% endif %}"
+                           class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+                        {% if task %}
+                            <a href="{% url 'task_delete' task.pk %}" class="ms-auto btn btn-sm"
+                               style="color:#f87171; border:1px solid rgba(239,68,68,0.3); background:rgba(239,68,68,0.05);">
+                                <i class="bi bi-trash me-1"></i>Delete
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Priority preview -->
+        <div class="card mt-3 p-3" style="border-style:dashed; border-color:#2d3148;">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div style="font-size:0.7rem;text-transform:uppercase;color:#64748b;font-weight:600;letter-spacing:0.1em;">Priority Guide</div>
+                <span class="badge badge-priority-low">Low — Nice to have</span>
+                <span class="badge badge-priority-medium">Medium — Important</span>
+                <span class="badge badge-priority-high">High — Urgent / Critical</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

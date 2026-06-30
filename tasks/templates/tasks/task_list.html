@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}All Tasks — TaskFlow{% endblock %}
+{% block page_title %}All Tasks{% endblock %}
+
+{% block content %}
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(99,102,241,0.15);">
+                <i class="bi bi-stack" style="color:#a5b4fc"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ counts.total }}</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(100,116,139,0.15);">
+                <i class="bi bi-circle" style="color:#94a3b8"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ counts.todo }}</div>
+                <div class="stat-label">To Do</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(99,102,241,0.15);">
+                <i class="bi bi-lightning" style="color:#a5b4fc"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ counts.in_progress }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(34,197,94,0.15);">
+                <i class="bi bi-check-circle" style="color:#4ade80"></i>
+            </div>
+            <div>
+                <div class="stat-value">{{ counts.done }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-12 col-md-5">
+            {{ filter_form.search.label_tag }}
+            {{ filter_form.search }}
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label">Status</label>
+            {{ filter_form.status }}
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label">Priority</label>
+            {{ filter_form.priority }}
+        </div>
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm flex-fill">
+                <i class="bi bi-search me-1"></i> Filter
+            </button>
+            <a href="{% url 'task_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-x-lg"></i>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Tasks Table -->
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-list-task text-muted"></i>
+            <span class="fw-semibold" style="font-size:0.9rem;">Tasks</span>
+            <span class="badge bg-secondary ms-1">{{ tasks.count }}</span>
+        </div>
+        <a href="{% url 'task_board' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-kanban me-1"></i> Board View
+        </a>
+    </div>
+
+    {% if tasks %}
+        {% for task in tasks %}
+        <div class="task-list-row">
+            <!-- Status indicator -->
+            <div class="flex-shrink-0">
+                {% if task.status == 'done' %}
+                    <i class="bi bi-check-circle-fill" style="color:#22c55e; font-size:1.1rem;"></i>
+                {% elif task.status == 'in_progress' %}
+                    <i class="bi bi-record-circle-fill" style="color:#6366f1; font-size:1.1rem;"></i>
+                {% else %}
+                    <i class="bi bi-circle" style="color:#64748b; font-size:1.1rem;"></i>
+                {% endif %}
+            </div>
+
+            <!-- Title -->
+            <div class="flex-grow-1 min-width-0">
+                <a href="{% url 'task_detail' task.pk %}" class="{% if task.status == 'done' %}text-decoration-line-through opacity-60{% endif %}">
+                    {{ task.title }}
+                </a>
+                {% if task.description %}
+                    <div class="text-muted" style="font-size:0.75rem; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:400px;">
+                        {{ task.description|truncatechars:80 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Priority Badge -->
+            <div class="flex-shrink-0 d-none d-md-block">
+                <span class="badge badge-priority-{{ task.priority }}">{{ task.get_priority_display }}</span>
+            </div>
+
+            <!-- Status Badge -->
+            <div class="flex-shrink-0 d-none d-md-block">
+                <span class="badge badge-status-{{ task.status }}">{{ task.get_status_display }}</span>
+            </div>
+
+            <!-- Due Date -->
+            <div class="flex-shrink-0 d-none d-lg-flex">
+                {% if task.due_date %}
+                    <span class="due-date-badge {% if task.is_overdue %}overdue{% endif %}">
+                        <i class="bi bi-calendar3"></i>
+                        {{ task.due_date|date:"M d, Y" }}
+                        {% if task.is_overdue %}
+                            <span class="ms-1 badge" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3);font-size:0.65rem;">Overdue</span>
+                        {% endif %}
+                    </span>
+                {% else %}
+                    <span class="due-date-badge">
+                        <i class="bi bi-calendar3 opacity-25"></i>
+                        <span class="opacity-25">No date</span>
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Comments count -->
+            <div class="flex-shrink-0 d-none d-lg-block">
+                <span style="font-size:0.75rem; color:#64748b;">
+                    <i class="bi bi-chat me-1"></i>{{ task.comments.count }}
+                </span>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex-shrink-0 d-flex gap-1">
+                <a href="{% url 'task_edit' task.pk %}" class="btn btn-sm" style="color:#64748b; padding:4px 8px;"
+                   title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </a>
+                <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm" style="color:#64748b; padding:4px 8px;"
+                   title="Delete">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-5">
+            <div style="font-size:3rem; opacity:0.3; margin-bottom:1rem;">📋</div>
+            <h6 class="text-muted">No tasks found</h6>
+            <p class="text-muted" style="font-size:0.875rem;">
+                {% if request.GET %}
+                    No tasks match your filters. <a href="{% url 'task_list' %}">Clear filters</a>
+                {% else %}
+                    Get started by creating your first task.
+                {% endif %}
+            </p>
+            {% if not request.GET %}
+                <a href="{% url 'task_create' %}" class="btn btn-primary btn-sm mt-2">
+                    <i class="bi bi-plus-lg me-1"></i> Create Task
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

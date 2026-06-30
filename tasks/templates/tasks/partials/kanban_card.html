@@ -1,0 +1,41 @@
+<div class="task-card" draggable="true" data-task-id="{{ task.pk }}" data-status="{{ task.status }}">
+    <div class="d-flex align-items-start justify-content-between mb-2">
+        <span class="badge badge-priority-{{ task.priority }}">{{ task.get_priority_display }}</span>
+        <div class="d-flex gap-1">
+            <a href="{% url 'task_edit' task.pk %}" class="btn btn-sm p-0" style="color:#475569; line-height:1;" title="Edit">
+                <i class="bi bi-pencil" style="font-size:0.75rem;"></i>
+            </a>
+            <a href="{% url 'task_delete' task.pk %}" class="btn btn-sm p-0 ms-1" style="color:#475569; line-height:1;" title="Delete">
+                <i class="bi bi-trash" style="font-size:0.75rem;"></i>
+            </a>
+        </div>
+    </div>
+
+    <a href="{% url 'task_detail' task.pk %}" style="text-decoration:none;">
+        <div class="task-card-title">{{ task.title }}</div>
+    </a>
+
+    {% if task.description %}
+        <div class="task-card-meta mb-2">{{ task.description|truncatechars:60 }}</div>
+    {% endif %}
+
+    <div class="d-flex align-items-center justify-content-between mt-2">
+        {% if task.due_date %}
+            <span class="due-date-badge {% if task.is_overdue %}overdue{% endif %}">
+                <i class="bi bi-calendar3"></i>
+                {{ task.due_date|date:"M d" }}
+                {% if task.is_overdue %}<i class="bi bi-exclamation-circle ms-1"></i>{% endif %}
+            </span>
+        {% else %}
+            <span></span>
+        {% endif %}
+
+        {% with comment_count=task.comments.count %}
+        {% if comment_count %}
+            <span class="task-card-meta">
+                <i class="bi bi-chat me-1"></i>{{ comment_count }}
+            </span>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>

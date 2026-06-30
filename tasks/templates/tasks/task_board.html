@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}Board — TaskFlow{% endblock %}
+{% block page_title %}Kanban Board{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kanban-wrapper {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 900px) {
+        .kanban-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <p class="text-muted mb-0" style="font-size:0.875rem;">Drag and drop tasks between columns to update their status.</p>
+    </div>
+    <a href="{% url 'task_list' %}" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-list-task me-1"></i> List View
+    </a>
+</div>
+
+<div class="kanban-wrapper">
+    <!-- TO DO Column -->
+    <div class="kanban-column col-todo">
+        <div class="kanban-column-header">
+            <h6 style="color:#94a3b8;">
+                <i class="bi bi-circle me-2"></i>To Do
+            </h6>
+            <span class="badge-count">{{ todo_tasks.count }}</span>
+        </div>
+        <div class="kanban-body">
+            <div class="drop-zone" id="col-todo" data-status="todo">
+                {% for task in todo_tasks %}
+                    {% include "tasks/partials/kanban_card.html" %}
+                {% empty %}
+                    <div class="text-center py-4 empty-column-msg">
+                        <i class="bi bi-inbox" style="font-size:2rem;opacity:0.2;"></i>
+                        <p class="text-muted mt-2 mb-0" style="font-size:0.75rem;">No tasks</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- IN PROGRESS Column -->
+    <div class="kanban-column col-inprogress">
+        <div class="kanban-column-header">
+            <h6 style="color:#a5b4fc;">
+                <i class="bi bi-lightning me-2"></i>In Progress
+            </h6>
+            <span class="badge-count">{{ in_progress_tasks.count }}</span>
+        </div>
+        <div class="kanban-body">
+            <div class="drop-zone" id="col-in_progress" data-status="in_progress">
+                {% for task in in_progress_tasks %}
+                    {% include "tasks/partials/kanban_card.html" %}
+                {% empty %}
+                    <div class="text-center py-4 empty-column-msg">
+                        <i class="bi bi-inbox" style="font-size:2rem;opacity:0.2;"></i>
+                        <p class="text-muted mt-2 mb-0" style="font-size:0.75rem;">No tasks</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- DONE Column -->
+    <div class="kanban-column col-done">
+        <div class="kanban-column-header">
+            <h6 style="color:#4ade80;">
+                <i class="bi bi-check-circle me-2"></i>Done
+            </h6>
+            <span class="badge-count">{{ done_tasks.count }}</span>
+        </div>
+        <div class="kanban-body">
+            <div class="drop-zone" id="col-done" data-status="done">
+                {% for task in done_tasks %}
+                    {% include "tasks/partials/kanban_card.html" %}
+                {% empty %}
+                    <div class="text-center py-4 empty-column-msg">
+                        <i class="bi bi-inbox" style="font-size:2rem;opacity:0.2;"></i>
+                        <p class="text-muted mt-2 mb-0" style="font-size:0.75rem;">No tasks</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick status change modal -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content" style="background:#1a1d27;border:1px solid #2d3148;">
+            <div class="modal-header border-0">
+                <h6 class="modal-title">Move Task</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="font-size:0.8rem;" id="modal-task-name"></p>
+                <div class="d-flex flex-column gap-2" id="status-buttons"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let draggedCard = null;
+    let draggedTaskId = null;
+
+    // Drag and drop
+    document.querySelectorAll('.task-card[draggable]').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+            draggedCard = card;
+            draggedTaskId = card.dataset.taskId;
+            card.classList.add('dragging');
+        });
+
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            draggedCard = null;
+        });
+    });
+
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+
+        zone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+
+            if (!draggedCard || !draggedTaskId) return;
+
+            const newStatus = zone.dataset.status;
+            const currentStatus = draggedCard.dataset.status;
+            if (newStatus === currentStatus) return;
+
+            // Remove empty msg
+            zone.querySelectorAll('.empty-column-msg').forEach(el => el.remove());
+
+            // Move card
+            zone.appendChild(draggedCard);
+            draggedCard.dataset.status = newStatus;
+
+            // Update counter badges
+            updateColumnCounts();
+
+            // AJAX update
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            try {
+                const resp = await fetch(`/task/${draggedTaskId}/status/`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (!resp.ok) throw new Error('Failed to update status');
+            } catch (err) {
+                console.error('Error updating task status:', err);
+            }
+        });
+    });
+
+    function updateColumnCounts() {
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            const count = zone.querySelectorAll('.task-card').length;
+            const column = zone.closest('.kanban-column');
+            const badge = column.querySelector('.badge-count');
+            if (badge) badge.textContent = count;
+        });
+    }
+
+    // Mobile: move via modal
+    document.querySelectorAll('.task-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('a') || e.target.closest('button')) return;
+            if (window.innerWidth > 768) return; // desktop uses drag
+
+            const taskId = card.dataset.taskId;
+            const taskTitle = card.querySelector('.task-card-title').textContent;
+            const currentStatus = card.dataset.status;
+
+            document.getElementById('modal-task-name').textContent = taskTitle;
+
+            const statuses = [
+                { value: 'todo', label: 'To Do', color: '#94a3b8' },
+                { value: 'in_progress', label: 'In Progress', color: '#a5b4fc' },
+                { value: 'done', label: 'Done', color: '#4ade80' },
+            ];
+
+            const buttonsEl = document.getElementById('status-buttons');
+            buttonsEl.innerHTML = statuses.map(s => `
+                <button class="btn btn-sm w-100 text-start ${s.value === currentStatus ? 'btn-secondary disabled' : 'btn-outline-secondary'}"
+                        style="border-color:#2d3148; color:${s.color};"
+                        onclick="moveTask('${taskId}', '${s.value}', this)">
+                    <i class="bi bi-${s.value === 'todo' ? 'circle' : s.value === 'in_progress' ? 'lightning' : 'check-circle'} me-2"></i>
+                    ${s.label}
+                    ${s.value === currentStatus ? ' (current)' : ''}
+                </button>
+            `).join('');
+
+            new bootstrap.Modal(document.getElementById('statusModal')).show();
+        });
+    });
+
+    async function moveTask(taskId, newStatus, btn) {
+        const formData = new FormData();
+        formData.append('status', newStatus);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        await fetch(`/task/${taskId}/status/`, { method: 'POST', body: formData });
+        location.reload();
+    }
+</script>
+{% endblock %}
